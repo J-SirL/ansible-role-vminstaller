@@ -11,7 +11,7 @@
 
 - name: create and copy the autoyast file of the machine
   template:
-    src: "opensuse/autoyast.cfg"
+    src: "opensuse/autoyast.xml"
     dest: "{{virtualfilespath }}{{ inventory_hostname }}.cfg"
   delegate_to: "{{ hyper }}"
 
