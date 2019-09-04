@@ -1,9 +1,12 @@
 - name: get webserver variables
   include_vars: webserver.yml
 
-#- name: create and copy the autoinstall file of the machine
-#  action: template src=openbsd/autoinstall.conf dest="{{ webpath }}{{ inventory_hostname }}.conf" mode=444
-#  delegate_to: "{{ webserver }}"
+- name: create and copy the autoinstall file of the machine
+  template:
+    src: openbsd/autoinstall.conf
+    dest: "{{ virtualfilespath }}autoinstall.conf"
+    mode: 0444
+  delegate_to: "{{ hyper }}"
 
 - name: copy templated install script
   template:
@@ -26,11 +29,17 @@
 - name: install script dependencies
   yum:
     pkg: "{{ item }}"
+    dest: "{{ webpath }}/{{ inventory_hostname }}.conf"
+    owner: "{{ webuser }}"
+    group: "{{ webuser}}"
+    mode: 0664
+  delegate_to: "{{ webserver }}"
+
+- name: install script dependencies
+  yum:
+    pkg: expect dvd+rw-tools
     state: latest
   delegate_to: "{{ hyper }}"
-  with_items:
-    - expect
-    - dvd+rw-tools
 
 #- name: execute install script
 #  shell: "{{ virtualfilespath }}{{ inventory_hostname }}-create-vm.sh"
@@ -41,10 +50,13 @@
 #  #register: createdvm
 
 - name: wait for installation to complete
-  local_action: pause minutes={{ vmwaittime }}
+  pause:
+    minutes: "{{ vmwaittime }}"
+  connection: local
   #only_if: "{{ createdvm.stdout_lines }} == ''"
 
-- template:
+- name: copy min-ram script
+  template:
     src: "templates/common/minram.sh"
     dest: "{{ virtualfilespath }}{{ inventory_hostname }}-minram.sh"
     owner: root
@@ -53,11 +65,13 @@
   delegate_to: "{{ hyper }}"
   when: ramsize < minram
 
-- action: raw {{ virtualfilespath }}{{ inventory_hostname }}-minram.sh
+- name: execute min-ram script
+  raw: "{{ virtualfilespath }}{{ inventory_hostname }}-minram.sh"
   delegate_to: "{{ hyper }}"
   when: ramsize < minram
 
-- virt:
+- name: start the vm
+  virt:
     guest: "{{ inventory_hostname }}"
     command: start
   delegate_to: "{{ hyper }}"
