@@ -10,7 +10,8 @@
     dest: "{{ item.path }}"
     size: "{{ item.size }}"
     format: "qcow2"
-    options: "preallocation=falloc"
+    options: "{{ item.options }}"
+    state: present
   with_items: "{{ disks }}"
   delegate_to: "{{ hyper }}"
   when: disks is defined
@@ -19,38 +20,48 @@
 
 ### PowerEL 7
 - name: start distribution installation - PEL7
-  include: install-vm-pel7.yml
+  include_tasks: install-vm-pel7.yml
   when: templatetype == 'pel7'
 
 ### EL 7
 - name: start distribution installation - EL7
-  include: install-vm-el7.yml
+  include_tasks: install-vm-el7.yml
   when: templatetype == 'el7'
 
 ### EL 6
 - name: start distribution installation - EL6
-  include: install-vm-el6.yml
+  include_tasks: install-vm-el6.yml
   when: templatetype == 'el6'
+
+### FEDORA
+- name: start distribution installation - FEDORA
+  include_tasks: install-vm-fedora.yml
+  when: templatetype == 'fedora'
 
 ### Debians
 - name: start distribution installation - DEBIAN
-  include: install-vm-debian.yml
+  include_tasks: install-vm-debian.yml
   when: templatetype == 'debian'
 
 ### UBUNTU
 - name: start distribution installation - UBUNTU
-  include: install-vm-ubuntu.yml
+  include_tasks: install-vm-ubuntu.yml
   when: templatetype == 'ubuntu'
 
 ### OPENBSD
 - name: start distribution installation - OPENBSD
-  include: install-vm-openbsd.yml
+  include_tasks: install-vm-openbsd.yml
   when: templatetype == 'openbsd'
 
 ### FREEBSD
-#- name: start distribution installation - FREEBSD
-#  include: install-vm-freebsd.yml
-#  when: templatetype == 'freebsd'
+- name: start distribution installation - FREEBSD
+  include_tasks: install-vm-freebsd.yml
+  when: templatetype == 'freebsd'
+
+### WIN SRV 16
+- name: start distribution installation - WINSRV16
+  include_tasks: install-vm-winsrv2016.yml
+  when: templatetype == 'winsrv2016'
 
 #- name: start distribution installation - WINSRV12
 #  include: install-vm-winsrv2012.yml
@@ -60,9 +71,7 @@
 #  include: install-vm-winsrv2008.yml
 #  when: templatetype == 'winsrv2008'
 
-#- name: start distribution installation - FEDORA
-#  include: install-vm-fedora.yml
-#  when: templatetype == 'fedora'
+
 
 #- name: start distribution installation - WIN7
 #  include: install-vm-win7.yml
@@ -73,11 +82,8 @@
 # GENTOO
 # FREEBSD
 
-
-###
-
 - name: execute minimum ram hack where required
-  include: minimum-ram-hack.yml
+  include_tasks: minimum-ram-hack.yml
   when: minram is defined
 
 - name: start the vm
