@@ -19,4 +19,6 @@
   register: createdvm
 
 - name: wait for vm to install
-  local_action: pause minutes={{ vmwaittime }}
+  pause:
+    minutes: "{{ vmwaittime }}"
+  connection: local
