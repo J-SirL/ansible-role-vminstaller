@@ -71,8 +71,6 @@
 #  include: install-vm-winsrv2008.yml
 #  when: templatetype == 'winsrv2008'
 
-
-
 #- name: start distribution installation - WIN7
 #  include: install-vm-win7.yml
 #  when: templatetype == 'win7'
