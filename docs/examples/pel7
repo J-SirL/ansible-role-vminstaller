@@ -1,0 +1,56 @@
+---
+ansible_host:
+ansible_port:
+ansible_user:
+ansible_private_key_file:
+hyper: (required)
+distro: (required)
+machinearch: (required)
+cputype: (required) [ cputype as defined by powerel ]
+virtualmachinetype: (optional) [ the machinetype used by qemu - will default to qemu default machine type if not defined]
+virtualcpus: (required) [ the total number of virtual cpus ]
+virtualsockets: (optional) [required if virtualcores and virtualthreads is used]
+virtualcores: (optional) [required if virtualcores and virtualthreads is used]
+virtualthreads: (optional) [required if virtualcores and virtualthreads is used]
+ramsize: (required)
+vmwaittime: (required)
+rootpwd: (required)
+language: (required)
+keyboard: (required)
+timezone: (required)
+sshdrsakeylength: (required)
+sshdecdsakeylength: (required)
+virtualfilespath: (required) [ where the vm-installer scripts are copied to on the hypervisor ]
+disks: (required) [ a list of all the disks ]
+  - path: (required) [ the full path and file name of the qemu image file ]
+    size: (required) [ the file size indicated with K,M,G,T as unit ]
+    options: (required) [ extra options to give qemu-img, like preallocation, if you want the default just leave empty ]
+iscsi: (optional) [ creates iscsi initiator lun's for use in the installation process ]
+  - iqnname: (required)
+    server: (required)
+    username: (required)
+    password: (required)
+iscsinic: (required)
+partitions: (required)
+  - [ partitions as in the kickstart file, each line is here is a partition or filesystem ]
+bootloader: (required) [ the exact line that comes into the kickstart eg : "bootloader --location=mbr --driveorder=vda,vdb,vdc" ]
+hostname: (required)
+nics: (required) [ each line is a nic in the guest with the link on the hypervisor ]
+  - type: (required0 [ what type of virtual nic, mostly chose from bridge or network ]
+    name: (required) [ the name of the device on the hypervisor ]
+    model: (required) [ the model type of the virtual nic as defined by qemu ]
+    device: (required) [ the device name as it would appear in the virtual machine ]
+    onboot: (required) [ whether the device in the virtual machine needs to be enabled on boot - on of off ]
+    bootproto: (required) [ what bootproto you want on the virtual nic - static / dhcp / none ]
+    ip: (optional) [ only to be used if bootproto is static - the ip address for the nic in the virtual machine ]
+    netmask: (optional) [ only to be used if bootproto is static - the ip address for the nic in the virtual machine ]
+    network: (optional) [ only to be used if bootproto is static - the network address for the nic in the virtual machine ]
+    broadcast: (optional) [ only to be used if bootproto is static - the broadcast address for the nic in the virtual machine ]
+    gateway: (optional) [ only to be used if bootproto is static - the gateway address for the nic in the virtual machine ]
+    nameserver: (optional) [ only to be used if bootproto is static - the nameserver address for the nic in the virtual machine ]
+    default: (optional) [ only to be used if bootproto is static - wheter this nic is the default gateway nic ]
+kickstartdevice: (optional) [ only useful if you have multiple nics ]
+users: (optional)
+  - name: (required)
+    id: (required)
+    sshpubkey: (required)
