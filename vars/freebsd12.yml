@@ -1,0 +1,18 @@
+---
+distroname: freebsd12
+distrotype: freebsd10.0
+templatetype: freebsd
+minram: 256
+freebsdversion: 12.0
+freebsdtype: RELEASE
+freebsdbaseurl: ftp://ftp.freebsd.org/pub/FreeBSD/releases/
+isolocation: "{{ freebsdbaseurl }}ISO-IMAGES/{{ freebsdversion }}/"
+#isolocation: ftp://ftp.freebsd.org/pub/FreeBSD/releases/ISO-IMAGES/12.0/
+isofile: "FreeBSD-{{ freebsdversion }}-{{ freebsdtype }}-{{ machinearch }}-disc1.iso"
+#isofile: FreeBSD-12.0-RELEASE-amd64-disc1.iso
+#isofile: FreeBSD-11.2-RELEASE-powerpc64-disc1.iso
+#distsite: {{ freebsdbaseurl }}/amd64/
+distsite: "{{ freebsdbaseurl }}/{{ machinearch }}/"
+#distsite: ftp://ftp.freebsd.org/pub/FreeBSD/releases/amd64/
+#distsite: ftp://ftp.freebsd.org/pub/FreeBSD/releases/powerpc64/
+textrargs: ''

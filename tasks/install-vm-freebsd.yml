@@ -1,0 +1,68 @@
+- name: install script dependencies
+  yum:
+    pkg: "{{ item }}"
+    state: latest
+    update_cache: yes
+  delegate_to: "{{ hyper }}"
+  loop:
+    - expect
+    - dvd+rw-tools
+
+- name: copy loader template
+  template:
+    src: freebsd/loader.conf
+    dest: "{{ virtualfilespath }}/loader.conf"
+    owner: root
+    group: root
+    mode: 0600
+  delegate_to: "{{ hyper }}"
+
+- name: copy installerconfig template
+  template:
+    src: freebsd/installerconfig
+    dest: "{{ virtualfilespath }}/installerconfig"
+    owner: root
+    group: root
+    mode: 0600
+  delegate_to: "{{ hyper }}"
+
+- name: copy install rcconf template
+  template:
+    src: freebsd/rc.conf
+    dest: "{{ virtualfilespath }}/rc.conf"
+    owner: root
+    group: root
+    mode: 0600
+  delegate_to: "{{ hyper }}"
+
+- name: copy installation media creator
+  template:
+    src: freebsd/createmedia.sh
+    dest: "{{ virtualfilespath }}/createmedia.sh"
+    owner: root
+    group: root
+    mode: 0700
+  delegate_to: "{{ hyper }}"
+
+- name: execute installation media creation
+  raw: "{{ virtualfilespath }}/createmedia.sh"
+  delegate_to: "{{ hyper }}"
+
+- name: make install script
+  template:
+    src: "common/install-vm.sh"
+    dest: "{{ virtualfilespath }}{{ inventory_hostname }}-create-vm.sh"
+    owner: root
+    group: root
+    mode: 0770
+  delegate_to: "{{ hyper }}"
+
+- name: execute install script
+  raw: "{{ virtualfilespath }}{{ inventory_hostname }}-create-vm.sh"
+  delegate_to: "{{ hyper }}"
+  register: createdvm
+
+- name: wait for installation to complete
+  pause:
+    minutes: "{{ vmwaittime }}"
+  connection: local
