@@ -58,6 +58,11 @@
   include_tasks: install-vm-freebsd.yml
   when: templatetype == 'freebsd'
 
+### OPENSUSE
+- name: start distribution installation - OEPNSUSE
+  include_tasks: install-vm-opensuse.yml
+  when: templatetype == "opensuse"
+
 ### WIN SRV 16
 - name: start distribution installation - WINSRV16
   include_tasks: install-vm-winsrv2016.yml

@@ -1,0 +1,8 @@
+---
+distroname: opensuse151
+distrotype: opensuse13.2
+templatetype: opensuse
+minram: 1024
+autoyastfile: autoinst.xml
+textrargs: "console={{ serialconsole }},115200 autoyast=file:///autoinst.xml biosdevname=0"
+gextrargs: "autoyast=file:///autoinst.xml biosdevname=0"

@@ -110,6 +110,8 @@ virt-install \
 {#    --boot hd,menu=off \ #}
 {% if injectfile is defined %}
     --initrd-inject={{ virtualfilespath }}{{ injectfile }} \
+{% elif autoywastfile %}
+    --initrd-inject={{ virtualfilespath }}{{ autoyastfile }} \
 {% else %}
     --initrd-inject={{ virtualfilespath }}{{ inventory_hostname }}.cfg \
 {% endif %}
