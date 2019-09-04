@@ -11,12 +11,12 @@
 if [ ! -f /etc/libvirt/qemu/{{ inventory_hostname }}.xml ]; then
 
 virt-install \
-{% if vmmachinetype is defined %}
-    --machine={{ vmmachinetype }} \
+{% if virtualmachinetype is defined %}
+    --machine={{ virtualmachinetype }} \
 {% endif %}
     --name={{ inventory_hostname }} \
 {% if virtualcputype is defined %}
-    --cpu={{ cputype }} \
+    --cpu={{ virtualcputype }} \
 {% endif %}
 {% if ( virtualsockets is defined and virtualcores is defined and virtualthreads is defined ) %}
     {% set vcpus = virtualsockets * virtualcores * virtualthreads %}
@@ -35,11 +35,16 @@ virt-install \
     --hvm \
     --accelerate \
     --os-variant={{ distrotype }} \
-{% set bootorder=1 %}
+{% set bootorder = 1 %}
+{% if disks is defined %}
 {% if machinearch is defined %}
 {% if ( machinearch == 'ppc64' or machinearch == 'ppc64le' or machinearch == 'ppc64el' or machinearch == 'powerpc' ) %}
-{% set disks = disks|reverse %}
+{#% set disks = disks|reverse %#}
 {% endif %}
+{% endif %}
+{% if isofile is defined %}
+--disk path={{ virtualfilespath }}/{{ isofile }},device=cdrom,boot_order={{ bootorder }}  \
+{% set bootorder = bootorder + 1 %}
 {% endif %}
 {% for disk in disks %}
     {% if disk.size[-1:] == 'T' %}
@@ -58,9 +63,23 @@ virt-install \
     {% else %}
     {% set disk_bootorder = bootorder %}
     {% endif %}
---disk path={{ disk.path }},device=disk,size={{ disk_size }},cache=writeback,format=qcow2,io=threads,bus=virtio,boot_order={{ disk_bootorder }} \
+{% if disk.bus is defined %}
+{% set diskbus = disk.bus %}
+{% else %}
+{% set diskbus = 'virtio' %}
+{% endif %}
+{% if installisos is defined %}
+--disk path={{ disk.path }},device=disk,size={{ disk_size }},cache=writeback,format=qcow2,io=threads,bus={{ diskbus }}  \
+{% else %}
+{% if disk.source is defined %}
+--disk path={{ disk.path }},device=disk,cache=writeback,format=qcow2,io=threads,bus={{ diskbus }},boot_order={{ disk_bootorder }} \
+{% else %}
+--disk path={{ disk.path }},device=disk,size={{ disk_size }},cache=writeback,format=qcow2,io=threads,bus={{ diskbus }},boot_order={{ disk_bootorder }} \
+{% endif %}
+{% endif %}
     {% set bootorder = bootorder + 1 %}
 {% endfor %}
+{% endif %}
 {% if installisos is defined %}
 {% for installiso in installisos %}
 --disk path={{ installiso }},device=cdrom \
@@ -71,17 +90,24 @@ virt-install \
     --boot cdrom,menu=off,useserial=on \
     --force \
 {% endif %}
+{% if disk is not defined and installisos is not defined %}
+    --disk none \
+{% endif %}
 {% if machinearch is defined %}
 {% if ( machinearch == 'ppc64' or machinearch == 'ppc64le' or machinearch == 'ppc64el' or machinearch == 'powerpc' ) %}
-{% set nics = nics|reverse %}
+{#{% set nics = nics|reverse %}#}
 {% endif %}
 {% endif %}
 {% for nic in nics %}
+{% if nic.type is defined %}
+{% if nic.type == "bridge" or nic.type == "network" %}
     --network {{ nic.type }}={{ nic.name }},model={{ nic.model }}{% if nic.mac is defined -%},mac={{ nic.mac }}{% endif %} \
+{% endif %}
+{% endif %}
 {% endfor %}
 {% if location is defined %}
     --location={{ location }} \
-    --boot hd,menu=off \
+{#    --boot hd,menu=off \ #}
 {% if injectfile is defined %}
     --initrd-inject={{ virtualfilespath }}{{ injectfile }} \
 {% else %}
@@ -91,7 +117,11 @@ virt-install \
 {% if graphics is defined %}--extra-args "{{ gextrargs }}{% else -%}--extra-args "{{ textrargs }}{% endif -%}{% if kickstartdevice is defined %} ksdevice={{ kickstartdevice }}{% endif %}" \
     --memballoon virtio \
 {% if graphics is defined %}
-    --graphics {{ graphics.type }},port={{ graphics.port }},tlsport={{ graphics.tlsport }}{% if graphics.password -%},password={{ graphics.password }}{% endif  %} --channel spicevmc \
+{% if tlsport is defined %}
+    --graphics {{ graphics.type }},port={{ graphics.port }},tlsport={{ graphics.tlsport }}{% if graphics.password is defined -%},password={{ graphics.password }}{% endif  %} --channel spicevmc \
+{% else %}
+    --graphics {{ graphics.type }},port={{ graphics.port }}{% if graphics.password is defined -%},password={{ graphics.password }}{% endif  %} --channel spicevmc \
+{% endif %}
 {% else %}
     --nographics \
 {% endif %}
