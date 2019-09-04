@@ -1,0 +1,23 @@
+- name: create and copy the kickstart file of the machine
+  template:
+    src: "fedora/kickstart.cfg"
+    dest: "{{virtualfilespath }}{{ inventory_hostname }}.cfg"
+  delegate_to: "{{ hyper }}"
+
+- name: create and copy the install script
+  template:
+    src: "common/install-vm.sh"
+    dest: "{{ virtualfilespath }}{{ inventory_hostname }}-create-vm.sh"
+    owner: root
+    group: root
+    mode: 0770
+  delegate_to: "{{ hyper }}"
+
+- name: execute install script
+  command: "/bin/bash {{ virtualfilespath }}{{ inventory_hostname }}-create-vm.sh"
+  delegate_to: "{{ hyper }}"
+  register: createdvm
+
+- name: wait for vm to install
+  pause: minutes={{ vmwaittime }}
+  connection: local
